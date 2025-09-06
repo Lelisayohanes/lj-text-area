@@ -241,6 +241,11 @@
   align-items: center;
 }
 
+.lj-text-area-toolbar .document-controls .import-controls {
+  display: flex;
+  gap: 4px;
+}
+
 .lj-text-area-toolbar .document-controls .button {
   background: white;
   border: 1px solid #ddd;

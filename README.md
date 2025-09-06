@@ -2,6 +2,9 @@
 
 A next-generation rich text editor library that combines the simplicity of a textarea with the power of advanced document editing tools.
 
+[![npm version](https://badge.fury.io/js/lj-text-area.svg)](https://badge.fury.io/js/lj-text-area)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 ## Features
 
 - **Simple Integration**: Works like a normal textarea with `value` and `onChange` props
@@ -84,7 +87,7 @@ The editor can be customized to show only the features you need:
 - Image insertion
 - Table creation and editing
 - Document export (DOCX, PDF)
-- Document import (DOCX)
+- Document import (DOCX, Excel, PDF)
 
 ## Props
 

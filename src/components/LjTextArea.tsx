@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { EditorProvider, useCurrentEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
@@ -14,7 +14,7 @@ import { Table } from '@tiptap/extension-table';
 import { TableRow } from '@tiptap/extension-table-row';
 import { TableCell } from '@tiptap/extension-table-cell';
 import { TableHeader } from '@tiptap/extension-table-header';
-import { exportToDocx, importFromDocx, exportToPdf } from '../utils/documentUtils';
+import { exportToDocx, importFromDocx, exportToPdf, importFromExcel, importFromPdf } from '../utils/documentUtils';
 import { isValidLinkUrl, isValidImageUrl } from '../utils/securityUtils';
 import './LjTextArea.css';
 
@@ -65,32 +65,6 @@ const Toolbar = ({ features, toolbarMode }: { features: LjTextAreaProps['feature
           {title} {isOpen ? '▲' : '▼'}
         </button>
         {isOpen && <div className="section-content">{children}</div>}
-      </div>
-    );
-  };
-
-  // Dropdown component for font selection
-  const Dropdown = ({ 
-    label, 
-    options, 
-    value, 
-    onChange 
-  }: { 
-    label: string; 
-    options: { value: string; label: string }[]; 
-    value: string; 
-    onChange: (value: string) => void; 
-  }) => {
-    return (
-      <div className="dropdown">
-        <label>{label}</label>
-        <select value={value} onChange={(e) => onChange(e.target.value)}>
-          {options.map(option => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
       </div>
     );
   };
@@ -361,22 +335,70 @@ const Toolbar = ({ features, toolbarMode }: { features: LjTextAreaProps['feature
             >
               Export PDF
             </button>
-            <input
-              type="file"
-              accept=".doc,.docx"
-              onChange={async (e) => {
-                const file = e.target.files?.[0];
-                if (file) {
-                  const content = await importFromDocx(file);
-                  editor.commands.setContent(content);
-                }
-              }}
-              style={{ display: 'none' }}
-              id="import-docx"
-            />
-            <label htmlFor="import-docx" className="button">
-              Import DOCX
-            </label>
+            <div className="import-controls">
+              <input
+                type="file"
+                accept=".doc,.docx"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    try {
+                      const content = await importFromDocx(file);
+                      editor.commands.setContent(content);
+                    } catch (error: any) {
+                      alert('Failed to import DOCX file: ' + error.message);
+                    }
+                  }
+                }}
+                style={{ display: 'none' }}
+                id="import-docx"
+              />
+              <label htmlFor="import-docx" className="button">
+                Import DOCX
+              </label>
+              
+              <input
+                type="file"
+                accept=".xlsx,.xls"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    try {
+                      const content = await importFromExcel(file);
+                      editor.commands.setContent(content);
+                    } catch (error: any) {
+                      alert('Failed to import Excel file: ' + error.message);
+                    }
+                  }
+                }}
+                style={{ display: 'none' }}
+                id="import-excel"
+              />
+              <label htmlFor="import-excel" className="button">
+                Import Excel
+              </label>
+              
+              <input
+                type="file"
+                accept=".pdf"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    try {
+                      const content = await importFromPdf(file);
+                      editor.commands.setContent(content);
+                    } catch (error: any) {
+                      alert('Failed to import PDF file: ' + error.message);
+                    }
+                  }
+                }}
+                style={{ display: 'none' }}
+                id="import-pdf"
+              />
+              <label htmlFor="import-pdf" className="button">
+                Import PDF
+              </label>
+            </div>
           </div>
         </CollapsibleSection>
       )}
@@ -453,26 +475,6 @@ const LjTextArea: React.FC<LjTextAreaProps> = ({
       onChange(html);
     }
   };
-
-  // Font options
-  const fontOptions = [
-    { value: 'Arial, sans-serif', label: 'Arial' },
-    { value: 'Times New Roman, serif', label: 'Times New Roman' },
-    { value: 'Courier New, monospace', label: 'Courier New' },
-    { value: 'Georgia, serif', label: 'Georgia' },
-    { value: 'Verdana, sans-serif', label: 'Verdana' },
-  ];
-
-  // Font size options
-  const fontSizeOptions = [
-    { value: '1', label: '8pt' },
-    { value: '2', label: '10pt' },
-    { value: '3', label: '12pt' },
-    { value: '4', label: '14pt' },
-    { value: '5', label: '18pt' },
-    { value: '6', label: '24pt' },
-    { value: '7', label: '36pt' },
-  ];
 
   return (
     <div className={`lj-text-area ${className}`} style={style}>

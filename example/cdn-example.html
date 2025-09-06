@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LJ Text Area CDN Example</title>
+  <!-- Include React -->
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <!-- Include Babel for JSX processing -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <!-- Include LJ Text Area CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/lj-text-area/dist/index.css">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .editor-container {
+      margin: 20px 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>LJ Text Area CDN Example</h1>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    // In a real CDN usage, you would include the library via a script tag
+    // For this example, we're simulating the usage
+    
+    const App = () => {
+      const [content, setContent] = React.useState('<p>Hello <strong>world</strong>!</p>');
+      
+      return (
+        <div>
+          <div className="editor-container">
+            <LjTextArea 
+              value={content}
+              onChange={setContent}
+              placeholder="Start typing here..."
+              style={{ minHeight: '300px' }}
+            />
+          </div>
+          
+          <h2>Output:</h2>
+          <div dangerouslySetInnerHTML={{ __html: content }} />
+        </div>
+      );
+    };
+    
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
+</body>
+</html>
