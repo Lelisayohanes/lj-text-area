@@ -40,21 +40,47 @@ export interface LjTextAreaProps {
   
   // Display modes
   toolbarMode?: 'full' | 'minimal' | 'compact';
+  
+  // Tailwind CSS support
+  /**
+   * When true, the component will use Tailwind CSS utility classes instead of built-in styles
+   * This allows for better customization with Tailwind
+   */
+  useTailwind?: boolean;
 }
 
 // Toolbar component for formatting options
-const Toolbar = ({ features, toolbarMode }: { features: LjTextAreaProps['features'], toolbarMode: LjTextAreaProps['toolbarMode'] }) => {
+const Toolbar = ({ features, toolbarMode, useTailwind }: { features: LjTextAreaProps['features'], toolbarMode: LjTextAreaProps['toolbarMode'], useTailwind?: boolean }) => {
   const { editor } = useCurrentEditor();
 
   if (!editor) {
     return null;
   }
 
+  // If using Tailwind, we'll use Tailwind classes instead of custom CSS
+  const toolbarClass = useTailwind 
+    ? `flex flex-wrap items-center gap-1 p-2 ${toolbarMode === 'minimal' ? 'p-1' : toolbarMode === 'compact' ? 'p-1.5' : 'p-2'} bg-gray-50 border-b border-gray-200`
+    : `lj-text-area-toolbar toolbar-mode-${toolbarMode}`;
+
   // Collapsible section component
   const CollapsibleSection = ({ title, children, defaultOpen = true }: { title: string, children: React.ReactNode, defaultOpen?: boolean }) => {
     const [isOpen, setIsOpen] = React.useState(defaultOpen);
     
     if (toolbarMode === 'minimal') return null;
+    
+    if (useTailwind) {
+      return (
+        <div className="flex items-center mx-1 border border-gray-300 rounded bg-gray-100">
+          <button 
+            className="bg-gray-200 border-none rounded py-1.5 px-3 cursor-pointer text-xs font-medium flex items-center gap-1"
+            onClick={() => setIsOpen(!isOpen)}
+          >
+            {title} {isOpen ? '▲' : '▼'}
+          </button>
+          {isOpen && <div className="flex gap-1 p-1 bg-white border-l border-gray-300">{children}</div>}
+        </div>
+      );
+    }
     
     return (
       <div className="toolbar-section">
@@ -69,27 +95,46 @@ const Toolbar = ({ features, toolbarMode }: { features: LjTextAreaProps['feature
     );
   };
 
+  // Button styling based on Tailwind usage
+  const getButtonClass = (isActive = false) => {
+    if (useTailwind) {
+      const baseClass = "flex items-center justify-center font-medium rounded border";
+      const sizeClass = toolbarMode === 'minimal' 
+        ? "text-xs py-1 px-2 h-7 min-w-7" 
+        : toolbarMode === 'compact' 
+        ? "text-sm py-1.5 px-2.5 h-8 min-w-8" 
+        : "py-1.5 px-2.5 h-9 min-w-9";
+      
+      const activeClass = isActive 
+        ? "bg-blue-600 text-white border-blue-600 shadow-inner" 
+        : "bg-white border-gray-300 text-gray-700 hover:bg-gray-100";
+      
+      return `${baseClass} ${sizeClass} ${activeClass}`;
+    }
+    return isActive ? 'is-active' : '';
+  };
+
   return (
-    <div className={`lj-text-area-toolbar toolbar-mode-${toolbarMode}`}>
+    <div className={toolbarClass}>
       {features?.basicFormatting !== false && (
         <>
           <button
             onClick={() => editor.chain().focus().toggleBold().run()}
-            className={editor.isActive('bold') ? 'is-active' : ''}
+            className={getButtonClass(editor.isActive('bold'))}
             title="Bold"
           >
             <strong>B</strong>
           </button>
           <button
             onClick={() => editor.chain().focus().toggleItalic().run()}
-            className={editor.isActive('italic') ? 'is-active' : ''}
+            className={getButtonClass(editor.isActive('italic'))}
             title="Italic"
           >
             <em>I</em>
           </button>
           <button
             onClick={() => editor.chain().focus().toggleUnderline().run()}
-            className={editor.isActive('underline') ? 'is-active' : ''}
+            className={getButtonClass(editor.isActive('underline'))}
             title="Underline"
           >
             <u>U</u>
@@ -103,7 +148,7 @@ const Toolbar = ({ features, toolbarMode }: { features: LjTextAreaProps['feature
                 alert('Invalid URL');
               }
             }}
-            className={editor.isActive('link') ? 'is-active' : ''}
+            className={getButtonClass(editor.isActive('link'))}
             title="Add Link"
           >
             🔗
@@ -111,6 +156,7 @@ const Toolbar = ({ features, toolbarMode }: { features: LjTextAreaProps['feature
           <button
             onClick={() => editor.chain().focus().unsetLink().run()}
             disabled={!editor.isActive('link')}
+            className={getButtonClass()}
             title="Remove Link"
           >
             🔗×
@@ -119,14 +165,14 @@ const Toolbar = ({ features, toolbarMode }: { features: LjTextAreaProps['feature
             <>
               <button
                 onClick={() => editor.chain().focus().toggleStrike().run()}
-                className={editor.isActive('strike') ? 'is-active' : ''}
+                className={getButtonClass(editor.isActive('strike'))}
                 title="Strikethrough"
               >
                 S
               </button>
               <button
                 onClick={() => editor.chain().focus().toggleHighlight().run()}
-                className={editor.isActive('highlight') ? 'is-active' : ''}
+                className={getButtonClass(editor.isActive('highlight'))}
                 title="Highlight"
               >
                 H
@@ -140,19 +186,19 @@ const Toolbar = ({ features, toolbarMode }: { features: LjTextAreaProps['feature
         <CollapsibleSection title="Headings">
           <button
             onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-            className={editor.isActive('heading', { level: 1 }) ? 'is-active' : ''}
+            className={getButtonClass(editor.isActive('heading', { level: 1 }))}
           >
             H1
           </button>
           <button
             onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-            className={editor.isActive('heading', { level: 2 }) ? 'is-active' : ''}
+            className={getButtonClass(editor.isActive('heading', { level: 2 }))}
           >
             H2
           </button>
           <button
             onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-            className={editor.isActive('heading', { level: 3 }) ? 'is-active' : ''}
+            className={getButtonClass(editor.isActive('heading', { level: 3 }))}
           >
             H3
           </button>
@@ -163,13 +209,13 @@ const Toolbar = ({ features, toolbarMode }: { features: LjTextAreaProps['feature
         <CollapsibleSection title="Lists">
           <button
             onClick={() => editor.chain().focus().toggleBulletList().run()}
-            className={editor.isActive('bulletList') ? 'is-active' : ''}
+            className={getButtonClass(editor.isActive('bulletList'))}
           >
             • List
           </button>
           <button
             onClick={() => editor.chain().focus().toggleOrderedList().run()}
-            className={editor.isActive('orderedList') ? 'is-active' : ''}
+            className={getButtonClass(editor.isActive('orderedList'))}
           >
             1. List
           </button>
@@ -180,25 +226,25 @@ const Toolbar = ({ features, toolbarMode }: { features: LjTextAreaProps['feature
         <CollapsibleSection title="Alignment">
           <button
             onClick={() => editor.chain().focus().setTextAlign('left').run()}
-            className={editor.isActive({ textAlign: 'left' }) ? 'is-active' : ''}
+            className={getButtonClass(editor.isActive({ textAlign: 'left' }))}
           >
             ←
           </button>
           <button
             onClick={() => editor.chain().focus().setTextAlign('center').run()}
-            className={editor.isActive({ textAlign: 'center' }) ? 'is-active' : ''}
+            className={getButtonClass(editor.isActive({ textAlign: 'center' }))}
           >
             ↔
           </button>
           <button
             onClick={() => editor.chain().focus().setTextAlign('right').run()}
-            className={editor.isActive({ textAlign: 'right' }) ? 'is-active' : ''}
+            className={getButtonClass(editor.isActive({ textAlign: 'right' }))}
           >
             →
           </button>
           <button
             onClick={() => editor.chain().focus().setTextAlign('justify').run()}
-            className={editor.isActive({ textAlign: 'justify' }) ? 'is-active' : ''}
+            className={getButtonClass(editor.isActive({ textAlign: 'justify' }))}
           >
             ≡
           </button>
@@ -207,15 +253,16 @@ const Toolbar = ({ features, toolbarMode }: { features: LjTextAreaProps['feature
       
       {features?.colors !== false && (
         <CollapsibleSection title="Colors">
-          <div className="color-controls">
+          <div className={useTailwind ? "flex items-center gap-1 ml-2 pl-2 border-l border-gray-300" : "color-controls"}>
             <input
               type="color"
               onInput={(e) => editor.chain().focus().setColor((e.target as HTMLInputElement).value).run()}
               value={editor.getAttributes('textStyle').color || '#000000'}
+              className={useTailwind ? "w-7 h-7 border border-gray-300 rounded cursor-pointer" : ""}
             />
             <button
               onClick={() => editor.chain().focus().unsetColor().run()}
-              className="unset-color"
+              className={useTailwind ? `${getButtonClass()} text-xs py-1 px-2` : "unset-color"}
             >
               Clear
             </button>
@@ -234,6 +281,7 @@ const Toolbar = ({ features, toolbarMode }: { features: LjTextAreaProps['feature
                 alert('Invalid image URL');
               }
             }}
+            className={getButtonClass()}
             title="Insert Image from URL"
           >
             🌐
@@ -255,6 +303,7 @@ const Toolbar = ({ features, toolbarMode }: { features: LjTextAreaProps['feature
               };
               input.click();
             }}
+            className={getButtonClass()}
             title="Upload Image"
           >
             📁
@@ -264,51 +313,59 @@ const Toolbar = ({ features, toolbarMode }: { features: LjTextAreaProps['feature
       
       {features?.tables !== false && (
         <CollapsibleSection title="Tables">
-          <div className="table-controls">
+          <div className={useTailwind ? "flex flex-wrap gap-1 ml-2 pl-2 border-l border-gray-300" : "table-controls"}>
             <button
               onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()}
+              className={getButtonClass()}
             >
               Insert Table
             </button>
             <button
               onClick={() => editor.chain().focus().addColumnBefore().run()}
               disabled={!editor.can().addColumnBefore()}
+              className={getButtonClass()}
             >
               Add Col Before
             </button>
             <button
               onClick={() => editor.chain().focus().addColumnAfter().run()}
               disabled={!editor.can().addColumnAfter()}
+              className={getButtonClass()}
             >
               Add Col After
             </button>
             <button
               onClick={() => editor.chain().focus().deleteColumn().run()}
               disabled={!editor.can().deleteColumn()}
+              className={getButtonClass()}
             >
               Delete Column
             </button>
             <button
               onClick={() => editor.chain().focus().addRowBefore().run()}
               disabled={!editor.can().addRowBefore()}
+              className={getButtonClass()}
             >
               Add Row Before
             </button>
             <button
               onClick={() => editor.chain().focus().addRowAfter().run()}
               disabled={!editor.can().addRowAfter()}
+              className={getButtonClass()}
             >
               Add Row After
             </button>
             <button
               onClick={() => editor.chain().focus().deleteRow().run()}
               disabled={!editor.can().deleteRow()}
+              className={getButtonClass()}
             >
               Delete Row
             </button>
             <button
               onClick={() => editor.chain().focus().deleteTable().run()}
               disabled={!editor.can().deleteTable()}
+              className={getButtonClass()}
             >
               Delete Table
             </button>
@@ -318,12 +375,18 @@ const Toolbar = ({ features, toolbarMode }: { features: LjTextAreaProps['feature
       
       {features?.documentHandling !== false && (
         <CollapsibleSection title="Documents">
-          <div className="document-controls">
+          <div className={useTailwind ? "flex flex-wrap gap-1 ml-2 pl-2 border-l border-gray-300 items-center" : "document-controls"}>
             <button
-              onClick={() => {
-                const content = editor.getHTML();
-                exportToDocx(content);
+              onClick={async () => {
+                try {
+                  const content = editor.getHTML();
+                  await exportToDocx(content);
+                } catch (error: any) {
+                  alert('Failed to export DOCX file: ' + (error.message || 'Unknown error occurred'));
+                  console.error('DOCX export error:', error);
+                }
               }}
+              className={getButtonClass()}
             >
               Export DOCX
             </button>
@@ -332,10 +395,11 @@ const Toolbar = ({ features, toolbarMode }: { features: LjTextAreaProps['feature
                 const content = editor.getHTML();
                 exportToPdf(content);
               }}
+              className={getButtonClass()}
             >
               Export PDF
             </button>
-            <div className="import-controls">
+            <div className={useTailwind ? "flex gap-1" : "import-controls"}>
               <input
                 type="file"
                 accept=".doc,.docx"
@@ -346,14 +410,15 @@ const Toolbar = ({ features, toolbarMode }: { features: LjTextAreaProps['feature
                       const content = await importFromDocx(file);
                       editor.commands.setContent(content);
                     } catch (error: any) {
-                      alert('Failed to import DOCX file: ' + error.message);
+                      alert('Failed to import DOCX file: ' + (error.message || 'Unknown error occurred'));
+                      console.error('DOCX import error:', error);
                     }
                   }
                 }}
                 style={{ display: 'none' }}
                 id="import-docx"
               />
-              <label htmlFor="import-docx" className="button">
+              <label htmlFor="import-docx" className={useTailwind ? `${getButtonClass()} cursor-pointer text-center` : "button"}>
                 Import DOCX
               </label>
               
@@ -367,14 +432,15 @@ const Toolbar = ({ features, toolbarMode }: { features: LjTextAreaProps['feature
                       const content = await importFromExcel(file);
                       editor.commands.setContent(content);
                     } catch (error: any) {
-                      alert('Failed to import Excel file: ' + error.message);
+                      alert('Failed to import Excel file: ' + (error.message || 'Unknown error occurred'));
+                      console.error('Excel import error:', error);
                     }
                   }
                 }}
                 style={{ display: 'none' }}
                 id="import-excel"
               />
-              <label htmlFor="import-excel" className="button">
+              <label htmlFor="import-excel" className={useTailwind ? `${getButtonClass()} cursor-pointer text-center` : "button"}>
                 Import Excel
               </label>
               
@@ -388,14 +454,15 @@ const Toolbar = ({ features, toolbarMode }: { features: LjTextAreaProps['feature
                       const content = await importFromPdf(file);
                       editor.commands.setContent(content);
                     } catch (error: any) {
-                      alert('Failed to import PDF file: ' + error.message);
+                      alert('Failed to import PDF file: ' + (error.message || 'Unknown error occurred'));
+                      console.error('PDF import error:', error);
                     }
                   }
                 }}
                 style={{ display: 'none' }}
                 id="import-pdf"
               />
-              <label htmlFor="import-pdf" className="button">
+              <label htmlFor="import-pdf" className={useTailwind ? `${getButtonClass()} cursor-pointer text-center` : "button"}>
                 Import PDF
               </label>
             </div>
@@ -423,7 +490,8 @@ const LjTextArea: React.FC<LjTextAreaProps> = ({
     tables: true,
     documentHandling: true
   },
-  toolbarMode = 'full'
+  toolbarMode = 'full',
+  useTailwind = false
 }) => {
   const [content, setContent] = useState(value);
 
@@ -476,10 +544,15 @@ const LjTextArea: React.FC<LjTextAreaProps> = ({
     }
   };
 
+  // Determine the main container class based on Tailwind usage
+  const containerClass = useTailwind 
+    ? `border border-gray-300 rounded shadow-sm ${className}`
+    : `lj-text-area ${className}`;
+
   return (
-    <div className={`lj-text-area ${className}`} style={style}>
+    <div className={containerClass} style={style}>
       <EditorProvider
-        slotBefore={<Toolbar features={features} toolbarMode={toolbarMode} />}
+        slotBefore={<Toolbar features={features} toolbarMode={toolbarMode} useTailwind={useTailwind} />}
         extensions={extensions}
         content={content}
         onUpdate={handleUpdate}

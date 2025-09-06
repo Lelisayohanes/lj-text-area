@@ -20,6 +20,7 @@ A next-generation rich text editor library that combines the simplicity of a tex
 - **Extensible**: Built on Tiptap, making it easy to add custom extensions
 - **Lightweight**: Minimal core with optional extensions
 - **Framework Agnostic**: Works with React, Next.js, and other frameworks
+- **Tailwind CSS Support**: Works seamlessly with Tailwind CSS utility classes
 
 ## Installation
 
@@ -70,6 +71,26 @@ The editor can be customized to show only the features you need:
 />
 ```
 
+### Using with Tailwind CSS
+
+LJ Text Area has built-in support for Tailwind CSS. To use Tailwind classes for styling, set the `useTailwind` prop to `true`:
+
+```jsx
+<LjTextArea 
+  value={content}
+  onChange={setContent}
+  placeholder="Start typing..."
+  useTailwind={true}
+  className="border border-gray-300 rounded-lg shadow-sm"
+/>
+```
+
+When `useTailwind` is enabled:
+- The component uses Tailwind utility classes instead of built-in styles
+- Buttons and UI elements are styled with Tailwind classes
+- You can easily customize the appearance using Tailwind classes
+- The component integrates seamlessly with your Tailwind-based design system
+
 ### Toolbar Modes
 
 - `full` - Default mode with all features
@@ -98,6 +119,9 @@ The editor can be customized to show only the features you need:
 | placeholder | string | Placeholder text when editor is empty |
 | className | string | Additional CSS classes |
 | style | object | Inline styles |
+| useTailwind | boolean | Enable Tailwind CSS styling (default: false) |
+| features | object | Feature toggles for the editor |
+| toolbarMode | 'full' \| 'minimal' \| 'compact' | Toolbar display mode |
 
 ## Development
 
@@ -121,6 +145,7 @@ npm run build
 - [x] Link embedding
 - [x] Table creation
 - [x] Document import/export (DOCX, PDF, HTML)
+- [x] Tailwind CSS support
 - [ ] Collaboration features
 - [ ] Plugin system for custom extensions
 

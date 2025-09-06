@@ -1,5 +1,5 @@
 {
-  "name": "@lelisay/lj-text-area",
+  "name": "lj-text-area",
   "version": "1.0.0",
   "description": "A next-generation rich text editor library that combines the simplicity of a textarea with the power of advanced document editing tools.",
   "main": "dist/index.js",
@@ -24,14 +24,14 @@
     "react",
     "textarea"
   ],
-  "author": "Your Name <your.email@example.com>",
+  "author": "Lelisayohanes <lelisayohanes1991@gmail.com>",
   "license": "MIT",
   "type": "module",
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-username/lj-text-area.git"
+    "url": "https://github.com/Lelisayohanes/lj-text-area.git"
   },
-  "homepage": "https://github.com/your-username/lj-text-area#readme",
+  "homepage": "https://github.com/Lelisayohanes/lj-text-area#readme",
   "peerDependencies": {
     "react": "^19.1.1",
     "react-dom": "^19.1.1"
@@ -58,6 +58,7 @@
     "@tiptap/react": "^3.4.1",
     "@tiptap/starter-kit": "^3.4.1",
     "docx": "^9.5.1",
+    "lj-text-area": "^1.0.0",
     "mammoth": "^1.10.0",
     "pdfjs-dist": "^5.4.149",
     "xlsx": "^0.18.5"

@@ -1,3 +1,13 @@
+/* 
+ * LJ Text Area Styles
+ * These styles provide a default appearance for the component.
+ * When using Tailwind CSS, these styles can be overridden with utility classes.
+ */
+
+/* 
+ * Default styles - applied when not using Tailwind
+ * These styles maintain backward compatibility
+ */
 .lj-text-area {
   border: 1px solid #ddd;
   border-radius: 4px;
@@ -331,4 +341,30 @@
 .lj-text-area-toolbar.toolbar-mode-compact .toolbar-section .section-content button {
   padding: 3px 6px;
   font-size: 12px;
+}
+
+/*
+ * Tailwind CSS compatibility
+ * These styles ensure proper display when using Tailwind utility classes
+ */
+.lj-text-area .ProseMirror:focus {
+  outline: none;
+}
+
+/* Ensure tables display properly with Tailwind */
+.lj-text-area table {
+  border-collapse: collapse;
+}
+
+.lj-text-area table td,
+.lj-text-area table th {
+  border-width: 1px;
+  padding: 0.25rem 0.5rem;
+  position: relative;
+}
+
+/* Ensure images display properly with Tailwind */
+.lj-text-area img {
+  max-width: 100%;
+  height: auto;
 }

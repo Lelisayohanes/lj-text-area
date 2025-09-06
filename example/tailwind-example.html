@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LJ Text Area with Tailwind CSS</title>
+  <!-- Include Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Include React and ReactDOM -->
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <!-- Include the component CSS -->
+  <link rel="stylesheet" href="../dist/index.css">
+</head>
+<body>
+  <div id="root"></div>
+  
+  <script type="text/babel">
+    const { LjTextArea } = window['lj-text-area'];
+    
+    function App() {
+      const [content, setContent] = React.useState('<p>Hello <strong>world</strong>! This is a <span style="color: #ef4444">rich text editor</span> with Tailwind CSS support.</p>');
+      
+      return (
+        <div class="max-w-4xl mx-auto p-6">
+          <h1 class="text-3xl font-bold text-gray-800 mb-2">LJ Text Area with Tailwind CSS</h1>
+          <p class="text-gray-600 mb-6">This example demonstrates how to use LJ Text Area with Tailwind CSS classes.</p>
+          
+          <div class="mb-6">
+            <h2 class="text-xl font-semibold text-gray-700 mb-3">Default Editor</h2>
+            <LjTextArea 
+              value={content}
+              onChange={setContent}
+              placeholder="Start typing here..."
+              className="border rounded-lg shadow-sm"
+              style={{ minHeight: '300px' }}
+            />
+          </div>
+          
+          <div class="mb-6">
+            <h2 class="text-xl font-semibold text-gray-700 mb-3">Compact Editor with Tailwind</h2>
+            <LjTextArea 
+              value={content}
+              onChange={setContent}
+              placeholder="Compact editor with Tailwind..."
+              className="border rounded-lg shadow-sm"
+              toolbarMode="compact"
+              useTailwind={true}
+              style={{ minHeight: '200px' }}
+            />
+          </div>
+          
+          <div class="mb-6">
+            <h2 class="text-xl font-semibold text-gray-700 mb-3">Minimal Editor with Tailwind</h2>
+            <LjTextArea 
+              value={content}
+              onChange={setContent}
+              placeholder="Minimal editor with Tailwind..."
+              className="border rounded-lg shadow-sm"
+              toolbarMode="minimal"
+              useTailwind={true}
+              style={{ minHeight: '200px' }}
+            />
+          </div>
+          
+          <div class="mt-8 p-4 bg-gray-50 rounded-lg">
+            <h3 class="text-lg font-medium text-gray-800 mb-2">Output:</h3>
+            <div 
+              class="p-4 bg-white border rounded min-h-[100px]" 
+              dangerouslySetInnerHTML={{ __html: content }} 
+            />
+          </div>
+          
+          <div class="mt-6 p-4 bg-blue-50 rounded-lg">
+            <h3 class="text-lg font-medium text-blue-800 mb-2">Tailwind CSS Integration</h3>
+            <p class="text-blue-700">
+              By setting the <code class="bg-blue-100 px-1 rounded">useTailwind</code> prop to <code class="bg-blue-100 px-1 rounded">true</code>, 
+              the component will use Tailwind CSS utility classes for styling instead of the built-in styles. 
+              This allows for better customization and consistency with your Tailwind-based design system.
+            </p>
+          </div>
+        </div>
+      );
+    }
+    
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
+</body>
+</html>
