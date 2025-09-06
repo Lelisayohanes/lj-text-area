@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LJ Text Area Backend Integration Example</title>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <link rel="stylesheet" href="../dist/index.css">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .example {
+      margin-bottom: 40px;
+      padding: 20px;
+      border: 1px solid #eee;
+      border-radius: 8px;
+    }
+    h1, h2 {
+      color: #333;
+    }
+    .editor-container {
+      margin: 20px 0;
+    }
+    .output {
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 16px;
+      background: #f8f9fa;
+      min-height: 100px;
+    }
+    .button-group {
+      margin: 10px 0;
+    }
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-right: 10px;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+  <h1>LJ Text Area Backend Integration</h1>
+  
+  <div id="app"></div>
+  
+  <script type="text/babel">
+    const { LjTextArea } = window['lj-text-area'];
+    
+    // Simulate backend API
+    const backendAPI = {
+      // Simulate saving content to backend
+      saveContent: (content) => {
+        console.log('Saving to backend:', content);
+        localStorage.setItem('editorContent', content);
+        return Promise.resolve({ success: true });
+      },
+      
+      // Simulate loading content from backend
+      loadContent: () => {
+        const content = localStorage.getItem('editorContent') || 
+          '<p>Welcome to <strong>LJ Text Area</strong>! This content was loaded from the backend.</p>';
+        console.log('Loading from backend:', content);
+        return Promise.resolve(content);
+      }
+    };
+    
+    function BackendExample() {
+      const [content, setContent] = React.useState('');
+      const [isEditing, setIsEditing] = React.useState(true);
+      const [isLoading, setIsLoading] = React.useState(false);
+      const [isSaving, setIsSaving] = React.useState(false);
+      
+      // Load content from backend on component mount
+      React.useEffect(() => {
+        loadFromBackend();
+      }, []);
+      
+      const loadFromBackend = async () => {
+        setIsLoading(true);
+        try {
+          const backendContent = await backendAPI.loadContent();
+          setContent(backendContent);
+        } catch (error) {
+          console.error('Failed to load content:', error);
+          setContent('<p>Error loading content</p>');
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      
+      const saveToBackend = async () => {
+        setIsSaving(true);
+        try {
+          await backendAPI.saveContent(content);
+          alert('Content saved successfully!');
+          setIsEditing(false);
+        } catch (error) {
+          console.error('Failed to save content:', error);
+          alert('Failed to save content');
+        } finally {
+          setIsSaving(false);
+        }
+      };
+      
+      const startEditing = () => {
+        setIsEditing(true);
+      };
+      
+      if (isLoading) {
+        return <div className="example">Loading content...</div>;
+      }
+      
+      return (
+        <div className="example">
+          <h2>Backend Integration Example</h2>
+          
+          <div className="button-group">
+            {isEditing ? (
+              <>
+                <button onClick={saveToBackend} disabled={isSaving}>
+                  {isSaving ? 'Saving...' : 'Save to Backend'}
+                </button>
+                <button onClick={loadFromBackend}>Reload from Backend</button>
+              </>
+            ) : (
+              <>
+                <button onClick={startEditing}>Edit Content</button>
+                <button onClick={loadFromBackend}>Reload from Backend</button>
+              </>
+            )}
+          </div>
+          
+          {isEditing ? (
+            <div className="editor-container">
+              <LjTextArea 
+                value={content}
+                onChange={setContent}
+                placeholder="Start typing here..."
+                style={{ minHeight: '300px' }}
+              />
+            </div>
+          ) : (
+            <div>
+              <h3>Saved Content (Read-only view):</h3>
+              <div 
+                className="output"
+                dangerouslySetInnerHTML={{ __html: content }} 
+              />
+            </div>
+          )}
+        </div>
+      );
+    }
+    
+    ReactDOM.render(<BackendExample />, document.getElementById('app'));
+  </script>
+</body>
+</html>

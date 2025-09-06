@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { EditorProvider, useCurrentEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
@@ -9,12 +9,13 @@ import { TextStyle } from '@tiptap/extension-text-style';
 import Underline from '@tiptap/extension-underline';
 import Image from '@tiptap/extension-image';
 import Link from '@tiptap/extension-link';
+import FontFamily from '@tiptap/extension-font-family';
 import { Table } from '@tiptap/extension-table';
 import { TableRow } from '@tiptap/extension-table-row';
 import { TableCell } from '@tiptap/extension-table-cell';
 import { TableHeader } from '@tiptap/extension-table-header';
 import { exportToDocx, importFromDocx, exportToPdf } from '../utils/documentUtils';
-import { isValidLinkUrl } from '../utils/securityUtils';
+import { isValidLinkUrl, isValidImageUrl } from '../utils/securityUtils';
 import './LjTextArea.css';
 
 // Define the props for our component
@@ -64,6 +65,32 @@ const Toolbar = ({ features, toolbarMode }: { features: LjTextAreaProps['feature
           {title} {isOpen ? '▲' : '▼'}
         </button>
         {isOpen && <div className="section-content">{children}</div>}
+      </div>
+    );
+  };
+
+  // Dropdown component for font selection
+  const Dropdown = ({ 
+    label, 
+    options, 
+    value, 
+    onChange 
+  }: { 
+    label: string; 
+    options: { value: string; label: string }[]; 
+    value: string; 
+    onChange: (value: string) => void; 
+  }) => {
+    return (
+      <div className="dropdown">
+        <label>{label}</label>
+        <select value={value} onChange={(e) => onChange(e.target.value)}>
+          {options.map(option => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
       </div>
     );
   };
@@ -223,17 +250,42 @@ const Toolbar = ({ features, toolbarMode }: { features: LjTextAreaProps['feature
       )}
       
       {features?.images !== false && (
-        <button
-          onClick={() => {
-            const url = prompt('Enter image URL:');
-            if (url) {
-              editor.chain().focus().setImage({ src: url }).run();
-            }
-          }}
-          title="Insert Image"
-        >
-          🖼️
-        </button>
+        <>
+          <button
+            onClick={() => {
+              const url = prompt('Enter image URL:');
+              if (url && isValidImageUrl(url)) {
+                editor.chain().focus().setImage({ src: url }).run();
+              } else if (url) {
+                alert('Invalid image URL');
+              }
+            }}
+            title="Insert Image from URL"
+          >
+            🌐
+          </button>
+          <button
+            onClick={() => {
+              // Create a file input element
+              const input = document.createElement('input');
+              input.type = 'file';
+              input.accept = 'image/*';
+              input.onchange = (e) => {
+                const file = (e.target as HTMLInputElement).files?.[0];
+                if (file) {
+                  // In a real implementation, you would upload the file to a server
+                  // and get a URL back. For now, we'll create a local object URL.
+                  const url = URL.createObjectURL(file);
+                  editor.chain().focus().setImage({ src: url }).run();
+                }
+              };
+              input.click();
+            }}
+            title="Upload Image"
+          >
+            📁
+          </button>
+        </>
       )}
       
       {features?.tables !== false && (
@@ -382,6 +434,9 @@ const LjTextArea: React.FC<LjTextAreaProps> = ({
         rel: 'noopener noreferrer nofollow',
       },
     }),
+    FontFamily.configure({
+      types: ['textStyle'],
+    }),
     Table.configure({
       resizable: true,
     }),
@@ -398,6 +453,26 @@ const LjTextArea: React.FC<LjTextAreaProps> = ({
       onChange(html);
     }
   };
+
+  // Font options
+  const fontOptions = [
+    { value: 'Arial, sans-serif', label: 'Arial' },
+    { value: 'Times New Roman, serif', label: 'Times New Roman' },
+    { value: 'Courier New, monospace', label: 'Courier New' },
+    { value: 'Georgia, serif', label: 'Georgia' },
+    { value: 'Verdana, sans-serif', label: 'Verdana' },
+  ];
+
+  // Font size options
+  const fontSizeOptions = [
+    { value: '1', label: '8pt' },
+    { value: '2', label: '10pt' },
+    { value: '3', label: '12pt' },
+    { value: '4', label: '14pt' },
+    { value: '5', label: '18pt' },
+    { value: '6', label: '24pt' },
+    { value: '7', label: '36pt' },
+  ];
 
   return (
     <div className={`lj-text-area ${className}`} style={style}>
