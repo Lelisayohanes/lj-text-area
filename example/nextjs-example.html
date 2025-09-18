@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LjTextArea - Next.js SSR Fix Example</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/@tiptap/react@2.1.13/dist/index.umd.js"></script>
+    <script src="https://unpkg.com/@tiptap/starter-kit@2.1.13/dist/index.umd.js"></script>
+    <script src="https://unpkg.com/@tiptap/extension-placeholder@2.1.13/dist/index.umd.js"></script>
+    <script src="https://unpkg.com/@tiptap/extension-text-align@2.1.13/dist/index.umd.js"></script>
+    <script src="https://unpkg.com/@tiptap/extension-highlight@2.1.13/dist/index.umd.js"></script>
+    <script src="https://unpkg.com/@tiptap/extension-color@2.1.13/dist/index.umd.js"></script>
+    <script src="https://unpkg.com/@tiptap/extension-text-style@2.1.13/dist/index.umd.js"></script>
+    <script src="https://unpkg.com/@tiptap/extension-underline@2.1.13/dist/index.umd.js"></script>
+    <script src="https://unpkg.com/@tiptap/extension-image@2.1.13/dist/index.umd.js"></script>
+    <script src="https://unpkg.com/@tiptap/extension-link@2.1.13/dist/index.umd.js"></script>
+    <script src="https://unpkg.com/@tiptap/extension-font-family@2.1.13/dist/index.umd.js"></script>
+    <script src="https://unpkg.com/@tiptap/extension-table@2.1.13/dist/index.umd.js"></script>
+    <script src="https://unpkg.com/@tiptap/extension-table-row@2.1.13/dist/index.umd.js"></script>
+    <script src="https://unpkg.com/@tiptap/extension-table-cell@2.1.13/dist/index.umd.js"></script>
+    <script src="https://unpkg.com/@tiptap/extension-table-header@2.1.13/dist/index.umd.js"></script>
+    <script src="../dist/index.umd.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        .example-section {
+            margin-bottom: 40px;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background: #fafafa;
+        }
+        .example-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        .loading-placeholder {
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            font-style: italic;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+        .status.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>LjTextArea - Next.js SSR Fix Example</h1>
+            <p>This example demonstrates the SSR fix for Tiptap editor in Next.js applications</p>
+        </div>
+
+        <div class="example-section">
+            <div class="example-title">SSR-Safe Editor (Fixed)</div>
+            <div id="ssr-safe-editor"></div>
+            <div id="ssr-status"></div>
+        </div>
+
+        <div class="example-section">
+            <div class="example-title">Editor with Tailwind CSS</div>
+            <div id="tailwind-editor"></div>
+        </div>
+
+        <div class="example-section">
+            <div class="example-title">Minimal Toolbar Mode</div>
+            <div id="minimal-editor"></div>
+        </div>
+    </div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        const { EditorProvider, useCurrentEditor } = window.TiptapReact;
+        const StarterKit = window.TiptapStarterKit;
+        const Placeholder = window.TiptapPlaceholder;
+        const TextAlign = window.TiptapTextAlign;
+        const Highlight = window.TiptapHighlight;
+        const Color = window.TiptapColor;
+        const TextStyle = window.TiptapTextStyle;
+        const Underline = window.TiptapUnderline;
+        const Image = window.TiptapImage;
+        const Link = window.TiptapLink;
+        const FontFamily = window.TiptapFontFamily;
+        const Table = window.TiptapTable;
+        const TableRow = window.TiptapTableRow;
+        const TableCell = window.TiptapTableCell;
+        const TableHeader = window.TiptapTableHeader;
+
+        // Simulate SSR environment detection
+        const isSSR = typeof window === 'undefined' || !window.document;
+
+        // LjTextArea component with SSR fix
+        const LjTextArea = ({ value = '', onChange, placeholder = 'Start typing...', className = '', style = {}, features = {}, toolbarMode = 'full', useTailwind = false }) => {
+            const [content, setContent] = useState(value);
+            const [isClient, setIsClient] = useState(false);
+
+            useEffect(() => {
+                setContent(value);
+            }, [value]);
+
+            useEffect(() => {
+                setIsClient(true);
+            }, []);
+
+            const extensions = [
+                StarterKit.configure({
+                    heading: { levels: [1, 2, 3] }
+                }),
+                Placeholder.configure({ placeholder }),
+                TextAlign.configure({ types: ['heading', 'paragraph'] }),
+                Highlight, Color, TextStyle, Underline, Image,
+                Link.configure({
+                    openOnClick: false,
+                    HTMLAttributes: { rel: 'noopener noreferrer nofollow' }
+                }),
+                FontFamily.configure({ types: ['textStyle'] }),
+                Table.configure({ resizable: true }),
+                TableRow, TableHeader, TableCell
+            ];
+
+            const handleUpdate = ({ editor }) => {
+                const html = editor.getHTML();
+                setContent(html);
+                if (onChange) onChange(html);
+            };
+
+            const containerClass = useTailwind 
+                ? `border border-gray-300 rounded shadow-sm ${className}`
+                : `lj-text-area ${className}`;
+
+            if (!isClient) {
+                return (
+                    <div className={containerClass} style={style}>
+                        <div className={useTailwind ? "p-4 text-gray-500" : "loading-placeholder"}>
+                            Loading editor...
+                        </div>
+                    </div>
+                );
+            }
+
+            return (
+                <div className={containerClass} style={style}>
+                    <EditorProvider
+                        extensions={extensions}
+                        content={content}
+                        onUpdate={handleUpdate}
+                        editorProps={{ immediatelyRender: false }}
+                    >
+                    </EditorProvider>
+                </div>
+            );
+        };
+
+        // Status component to show SSR detection
+        const StatusDisplay = () => {
+            const [status, setStatus] = useState('Checking...');
+            
+            useEffect(() => {
+                if (isSSR) {
+                    setStatus('SSR Environment Detected - Editor will show loading state');
+                } else {
+                    setStatus('Client Environment - Editor will render normally');
+                }
+            }, []);
+
+            return (
+                <div className={`status ${isSSR ? 'error' : 'success'}`}>
+                    {status}
+                </div>
+            );
+        };
+
+        // Render examples
+        ReactDOM.render(<StatusDisplay />, document.getElementById('ssr-status'));
+        ReactDOM.render(
+            <LjTextArea 
+                placeholder="This editor is SSR-safe and won't cause hydration mismatches"
+                features={{
+                    basicFormatting: true,
+                    advancedFormatting: true,
+                    lists: true,
+                    alignment: true,
+                    colors: true,
+                    images: true,
+                    tables: true,
+                    documentHandling: true
+                }}
+            />, 
+            document.getElementById('ssr-safe-editor')
+        );
+        
+        ReactDOM.render(
+            <LjTextArea 
+                placeholder="Editor with Tailwind CSS styling"
+                useTailwind={true}
+                toolbarMode="compact"
+            />, 
+            document.getElementById('tailwind-editor')
+        );
+        
+        ReactDOM.render(
+            <LjTextArea 
+                placeholder="Minimal toolbar editor"
+                toolbarMode="minimal"
+                features={{
+                    basicFormatting: true,
+                    lists: true
+                }}
+            />, 
+            document.getElementById('minimal-editor')
+        );
+    </script>
+</body>
+</html>

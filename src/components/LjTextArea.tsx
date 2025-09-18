@@ -494,11 +494,17 @@ const LjTextArea: React.FC<LjTextAreaProps> = ({
   useTailwind = false
 }) => {
   const [content, setContent] = useState(value);
+  const [isClient, setIsClient] = useState(false);
 
   // Update content when value prop changes
   useEffect(() => {
     setContent(value);
   }, [value]);
+
+  // Set client-side flag to prevent SSR issues
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   // Define extensions for the editor
   const extensions = [
@@ -549,6 +555,17 @@ const LjTextArea: React.FC<LjTextAreaProps> = ({
     ? `border border-gray-300 rounded shadow-sm ${className}`
     : `lj-text-area ${className}`;
 
+  // Don't render editor on server side to prevent SSR issues
+  if (!isClient) {
+    return (
+      <div className={containerClass} style={style}>
+        <div className={useTailwind ? "p-4 text-gray-500" : "loading-placeholder"}>
+          Loading editor...
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={containerClass} style={style}>
       <EditorProvider
@@ -556,6 +573,7 @@ const LjTextArea: React.FC<LjTextAreaProps> = ({
         extensions={extensions}
         content={content}
         onUpdate={handleUpdate}
+        immediatelyRender={false}
       >
       </EditorProvider>
     </div>
